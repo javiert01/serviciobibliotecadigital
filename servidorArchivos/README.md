@@ -6,6 +6,7 @@ Servidor de archivos que provee una API REST para la gestion de usuarios y libro
 
 ```
 > npm install
+> npm install loopback-connector-sqlite --save (en caso de tener problemas con sqlite3)
 ```
 
 ## Uso
