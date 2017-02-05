@@ -3,6 +3,8 @@ import socket
 import thread
 import time
 import sys
+import requests
+import json
 
 class Cliente (threading.Thread):
 
@@ -36,6 +38,68 @@ class Cliente (threading.Thread):
             archivo.close()
             exit(0)
 
+menu = 0
+print "Menu"
+while (menu == 0):
+    print "1. Login"
+    print "2. Signup"
+
+    menu = raw_input()
+
+    if (menu == "1"):
+        print "ingresar usuario"
+        usuario = raw_input()
+        print "ingresar contrasenia"
+        contrasenia = raw_input()
+
+        resultado = requests.post('http://0.0.0.0:3000/api/Users/login', json ={"username": usuario, "password": contrasenia})
+
+        # Atrapa error en caso que exista
+        if resultado.status_code != 200:
+            print "Error: "+resultado.json()['error']['message']
+            exit(0)
+
+        token = resultado.json()['id']
+        print "token generado"
+
+        menu = 0
+
+        while (menu == 0):
+            print "1. listar libros disponibles"
+            print "2. descargar libro"
+
+            menu = raw_input()
+
+            if menu == "1":
+                libros = requests.get('http://0.0.0.0:3000/api/archivos/libros/files', params={"access_token":token})
+
+                numeroLibro = 0
+                for libro in libros.json():
+                    numeroLibro += 1
+                    nombreLibro = libro['name']
+                    print str(numeroLibro)+". "+nombreLibro
+
+                    menu = 0
+
+            if menu == "2":
+
+                libros = requests.get('http://0.0.0.0:3000/api/archivos/libros/files', params={"access_token":token})
+
+                numeroLibro = 0
+                nombresLibros = []
+                for libro in libros.json():
+                    numeroLibro += 1
+                    nombresLibros.append(libro['name'])
+                    print str(numeroLibro)+". "+libro['name']
+
+                menu = 0
+                menu = raw_input()
+
+                descarga = requests.get('http://0.0.0.0:3000/api/archivos/libros/download/'+nombresLibros[int(menu)-1], params={"access_token":token}, stream=True)
+                with open('./'+nombresLibros[int(menu)-1], 'wb') as f:
+                    f.write(descarga.content)
+
+
 # Primer argumento direccion IP
-a = Cliente(str(sys.argv[1]))
-a.start()
+#a = Cliente(str(sys.argv[1]))
+#a.start()
