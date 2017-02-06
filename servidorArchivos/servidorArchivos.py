@@ -8,6 +8,7 @@ from subprocess import call
 listaPuertosServidor = []
 listaPuertosConectados = []
 listaSo = []
+numeroSolictudesProcesado = 0
 
 # def mensajes (conn):
 #
@@ -29,6 +30,9 @@ listaSo = []
 #     exit(0)
 
 # puerto 7000 para servidor de archivos
+def inicioServidorArchivos():
+    call(["node", "."])
+
 class ServidorArchivos (threading.Thread):
 
     def __init__(self, ip):
@@ -53,9 +57,7 @@ class ServidorArchivos (threading.Thread):
         s.bind((str(miDireccionIP), 7001))
 
         print "iniciando servidor"
-        call(["node", "."])
-        print "servidor iniciado"
-
+        thServidorArchivos = thread.start_new_thread(inicioServidorArchivos,())
         # Limita la cantidad de escuchas
         s.listen(5)
 
@@ -63,7 +65,9 @@ class ServidorArchivos (threading.Thread):
         while 1:
             conn, addr = s.accept()
             print "Conectado a: "+addr[0]+":"+str(addr[1]);
-
+            global numeroSolictudesProcesado
+            numeroSolictudesProcesado = numeroSolictudesProcesado + 1
+            print "Procesado "+str(numeroSolictudesProcesado)+" solicitudes"
             # thServidor = thread.start_new_thread(mensajes,(conn,))
 
 a = ServidorArchivos(sys.argv[1])
