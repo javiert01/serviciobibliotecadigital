@@ -102,10 +102,16 @@ while (menu == 0):
 
                 # descargar libro seleccionado
                 descarga = requests.get('http://0.0.0.0:3000/api/archivos/libros/download/'+nombresLibros[int(menu)-1], params={"access_token":token}, stream=True)
+
+                if descarga.status_code != 200:
+                    print "Error: "+descarga.json()['error']['message']
+                    exit(0)
+
                 with open('./'+nombresLibros[int(menu)-1], 'wb') as f:
                     f.write(descarga.content)
 
-                    menu = 0
+                print "Archivo descargado!"
+                menu = 0
 
             if menu == "3":
                 print "Seleccionar archivo"
