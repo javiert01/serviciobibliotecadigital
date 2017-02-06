@@ -13,6 +13,10 @@ listaDireccionesIPServidores = []
 # a los clientes
 listaSocketsClientes = []
 
+# Estadisticas
+solicitudesRecibido = 0
+solicitudesAtendido = 0
+
 # Devuele la direccion IP de un servidor disponible
 def seleccionServidorDisponible():
     print listaDireccionesIPServidores
@@ -23,6 +27,11 @@ def seleccionServidorDisponible():
 
     # envia la direccion ip de un servidor disponible
     conn.send(str(listaDireccionesIPServidores[numeroSeleccionado]))
+
+    global solicitudesAtendido
+    solicitudesAtendido = solicitudesAtendido + 1
+    print "enviado a: "+str(listaDireccionesIPServidores[numeroSeleccionado])
+    print "numero de solicitudes atendidas "+str(solicitudesAtendido)
 
 class ServidorParaClientes (threading.Thread):
 
@@ -48,6 +57,11 @@ class ServidorParaClientes (threading.Thread):
             if (len(listaDireccionesIPServidores) > 0):
                 # Agregar a cola de pendientes
                 listaSocketsClientes.insert(0, conn)
+
+                # Cuenta el numero de solicitudes recibidas
+                global solicitudesRecibido
+                solicitudesRecibido = solicitudesRecibido + 1
+                print "numero de solicitudes recibidas "+str(solicitudesRecibido)
 
                 # Da la direccion de un servidor mediante threads
                 thServidor = thread.start_new_thread(seleccionServidorDisponible,())
