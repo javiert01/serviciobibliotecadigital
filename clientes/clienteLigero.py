@@ -30,6 +30,10 @@ class Cliente (threading.Thread):
             s.close()
             exit(0)
         else:
+            s2 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s2.connect((data, 7001))
+            s2.close()
+
             s.close()
             exit(0)
 

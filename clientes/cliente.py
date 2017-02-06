@@ -30,6 +30,11 @@ class Cliente (threading.Thread):
             s.close()
             exit(0)
         else:
+            # Notifica al servidor solicitud procesado
+            s2 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s2.connect((data, 7001))
+            s2.close()
+
             menu = 0
             print "Menu"
             while (menu == 0):
@@ -37,6 +42,7 @@ class Cliente (threading.Thread):
                 print "2. Signup"
 
                 menu = raw_input()
+                print ""
 
                 if (menu == "1"):
                     print "ingresar usuario"
@@ -57,11 +63,13 @@ class Cliente (threading.Thread):
                     menu = 0
 
                     while (menu == 0):
+                        print ""
                         print "1. listar libros disponibles"
                         print "2. descargar libro"
                         print "3. subir archivo"
 
                         menu = raw_input()
+                        print ""
 
                         if menu == "1":
                             libros = requests.get('http://'+data+':7000/api/archivos/libros/files', params={"access_token":token})
@@ -87,6 +95,7 @@ class Cliente (threading.Thread):
 
                             menu = 0
                             menu = raw_input()
+                            print ""
 
                             # descargar libro seleccionado
                             descarga = requests.get('http://'+data+':7000/api/archivos/libros/download/'+nombresLibros[int(menu)-1], params={"access_token":token}, stream=True)
