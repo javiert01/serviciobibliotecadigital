@@ -134,7 +134,26 @@ while (menu == 0):
 
                 menu = 0
 
+    if (menu == "2"):
 
+        print "Ingresar usuario"
+        usuario = raw_input()
+
+        print "Ingresar contrasenia"
+        contrasenia = raw_input()
+
+        print "Ingresar correo"
+        email = raw_input()
+
+        # nuevo usuario
+        nuevoUsuario = requests.post('http://0.0.0.0:3000/api/Users', json ={"username": usuario, "password": contrasenia, "email":email})
+
+        if nuevoUsuario.status_code != 200:
+            print "Error: "+nuevoUsuario.json()['error']['message']
+            exit(0)
+
+        print "Usuario creado"
+        menu = 0
 
 # Primer argumento direccion IP
 #a = Cliente(str(sys.argv[1]))
