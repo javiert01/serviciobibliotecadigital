@@ -5,6 +5,10 @@ import time
 import sys
 import requests
 import json
+import os
+from Tkinter import Tk
+from tkFileDialog import askopenfilename
+
 
 class Cliente (threading.Thread):
 
@@ -67,6 +71,7 @@ while (menu == 0):
         while (menu == 0):
             print "1. listar libros disponibles"
             print "2. descargar libro"
+            print "3. subir archivo"
 
             menu = raw_input()
 
@@ -95,9 +100,34 @@ while (menu == 0):
                 menu = 0
                 menu = raw_input()
 
+                # descargar libro seleccionado
                 descarga = requests.get('http://0.0.0.0:3000/api/archivos/libros/download/'+nombresLibros[int(menu)-1], params={"access_token":token}, stream=True)
                 with open('./'+nombresLibros[int(menu)-1], 'wb') as f:
                     f.write(descarga.content)
+
+                    menu = 0
+
+            if menu == "3":
+                print "Seleccionar archivo"
+                Tk().withdraw()
+                rutaArchivo = askopenfilename( filetypes = (("Archivo PDF" , "*.pdf"), ("Todos los archivos","*.*")))
+
+                # Separador segun sistema operativo
+                separador = os.sep
+                path = rutaArchivo.split(separador)
+                nombreArchivo = path[len(path)-1]
+
+                # enviar archivo
+                subirArchivo = requests.post('http://0.0.0.0:3000/api/archivos/libros/upload', params={"access_token":token}, files={nombreArchivo: open(rutaArchivo, 'rb')})
+
+                if subirArchivo.status_code != 200:
+                    print "Error: "+subirArchivo.json()['error']['message']
+                    exit(0)
+
+                print "Archivo subido con exito!"
+
+                menu = 0
+
 
 
 # Primer argumento direccion IP
