@@ -30,131 +30,119 @@ class Cliente (threading.Thread):
             s.close()
             exit(0)
         else:
-            s2 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s2.connect((str(data), 7000))
+            menu = 0
+            print "Menu"
+            while (menu == 0):
+                print "1. Login"
+                print "2. Signup"
 
-            # creacion archivo
-            archivo = open("file.txt","wb")
-            itera = s2.recv(1024)
-            while (itera):
-                archivo.write(itera)
-                itera = s2.recv(1024)
-            archivo.close()
-            exit(0)
+                menu = raw_input()
 
-menu = 0
-print "Menu"
-while (menu == 0):
-    print "1. Login"
-    print "2. Signup"
+                if (menu == "1"):
+                    print "ingresar usuario"
+                    usuario = raw_input()
+                    print "ingresar contrasenia"
+                    contrasenia = raw_input()
 
-    menu = raw_input()
+                    resultado = requests.post('http://'+data+':7000/api/Users/login', json ={"username": usuario, "password": contrasenia})
 
-    if (menu == "1"):
-        print "ingresar usuario"
-        usuario = raw_input()
-        print "ingresar contrasenia"
-        contrasenia = raw_input()
+                    # Atrapa error en caso que exista
+                    if resultado.status_code != 200:
+                        print "Error: "+resultado.json()['error']['message']
+                        exit(0)
 
-        resultado = requests.post('http://0.0.0.0:3000/api/Users/login', json ={"username": usuario, "password": contrasenia})
-
-        # Atrapa error en caso que exista
-        if resultado.status_code != 200:
-            print "Error: "+resultado.json()['error']['message']
-            exit(0)
-
-        token = resultado.json()['id']
-        print "token generado"
-
-        menu = 0
-
-        while (menu == 0):
-            print "1. listar libros disponibles"
-            print "2. descargar libro"
-            print "3. subir archivo"
-
-            menu = raw_input()
-
-            if menu == "1":
-                libros = requests.get('http://0.0.0.0:3000/api/archivos/libros/files', params={"access_token":token})
-
-                numeroLibro = 0
-                for libro in libros.json():
-                    numeroLibro += 1
-                    nombreLibro = libro['name']
-                    print str(numeroLibro)+". "+nombreLibro
+                    token = resultado.json()['id']
+                    print "token generado"
 
                     menu = 0
 
-            if menu == "2":
+                    while (menu == 0):
+                        print "1. listar libros disponibles"
+                        print "2. descargar libro"
+                        print "3. subir archivo"
 
-                libros = requests.get('http://0.0.0.0:3000/api/archivos/libros/files', params={"access_token":token})
+                        menu = raw_input()
 
-                numeroLibro = 0
-                nombresLibros = []
-                for libro in libros.json():
-                    numeroLibro += 1
-                    nombresLibros.append(libro['name'])
-                    print str(numeroLibro)+". "+libro['name']
+                        if menu == "1":
+                            libros = requests.get('http://'+data+':7000/api/archivos/libros/files', params={"access_token":token})
 
-                menu = 0
-                menu = raw_input()
+                            numeroLibro = 0
+                            for libro in libros.json():
+                                numeroLibro += 1
+                                nombreLibro = libro['name']
+                                print str(numeroLibro)+". "+nombreLibro
 
-                # descargar libro seleccionado
-                descarga = requests.get('http://0.0.0.0:3000/api/archivos/libros/download/'+nombresLibros[int(menu)-1], params={"access_token":token}, stream=True)
+                                menu = 0
 
-                if descarga.status_code != 200:
-                    print "Error: "+descarga.json()['error']['message']
-                    exit(0)
+                        if menu == "2":
 
-                with open('./'+nombresLibros[int(menu)-1], 'wb') as f:
-                    f.write(descarga.content)
+                            libros = requests.get('http://'+data+':7000/api/archivos/libros/files', params={"access_token":token})
 
-                print "Archivo descargado!"
-                menu = 0
+                            numeroLibro = 0
+                            nombresLibros = []
+                            for libro in libros.json():
+                                numeroLibro += 1
+                                nombresLibros.append(libro['name'])
+                                print str(numeroLibro)+". "+libro['name']
 
-            if menu == "3":
-                print "Seleccionar archivo"
-                Tk().withdraw()
-                rutaArchivo = askopenfilename( filetypes = (("Archivo PDF" , "*.pdf"), ("Todos los archivos","*.*")))
+                            menu = 0
+                            menu = raw_input()
 
-                # Separador segun sistema operativo
-                separador = os.sep
-                path = rutaArchivo.split(separador)
-                nombreArchivo = path[len(path)-1]
+                            # descargar libro seleccionado
+                            descarga = requests.get('http://'+data+':7000/api/archivos/libros/download/'+nombresLibros[int(menu)-1], params={"access_token":token}, stream=True)
 
-                # enviar archivo
-                subirArchivo = requests.post('http://0.0.0.0:3000/api/archivos/libros/upload', params={"access_token":token}, files={nombreArchivo: open(rutaArchivo, 'rb')})
+                            if descarga.status_code != 200:
+                                print "Error: "+descarga.json()['error']['message']
+                                exit(0)
 
-                if subirArchivo.status_code != 200:
-                    print "Error: "+subirArchivo.json()['error']['message']
-                    exit(0)
+                            with open('./'+nombresLibros[int(menu)-1], 'wb') as f:
+                                f.write(descarga.content)
 
-                print "Archivo subido con exito!"
+                            print "Archivo descargado!"
+                            menu = 0
 
-                menu = 0
+                        if menu == "3":
+                            print "Seleccionar archivo"
+                            Tk().withdraw()
+                            rutaArchivo = askopenfilename( filetypes = (("Archivo PDF" , "*.pdf"), ("Todos los archivos","*.*")))
 
-    if (menu == "2"):
+                            # Separador segun sistema operativo
+                            separador = os.sep
+                            path = rutaArchivo.split(separador)
+                            nombreArchivo = path[len(path)-1]
 
-        print "Ingresar usuario"
-        usuario = raw_input()
+                            # enviar archivo
+                            subirArchivo = requests.post('http://'+data+':7000/api/archivos/libros/upload', params={"access_token":token}, files={nombreArchivo: open(rutaArchivo, 'rb')})
 
-        print "Ingresar contrasenia"
-        contrasenia = raw_input()
+                            if subirArchivo.status_code != 200:
+                                print "Error: "+subirArchivo.json()['error']['message']
+                                exit(0)
 
-        print "Ingresar correo"
-        email = raw_input()
+                            print "Archivo subido con exito!"
 
-        # nuevo usuario
-        nuevoUsuario = requests.post('http://0.0.0.0:3000/api/Users', json ={"username": usuario, "password": contrasenia, "email":email})
+                            menu = 0
 
-        if nuevoUsuario.status_code != 200:
-            print "Error: "+nuevoUsuario.json()['error']['message']
-            exit(0)
+                if (menu == "2"):
 
-        print "Usuario creado"
-        menu = 0
+                    print "Ingresar usuario"
+                    usuario = raw_input()
+
+                    print "Ingresar contrasenia"
+                    contrasenia = raw_input()
+
+                    print "Ingresar correo"
+                    email = raw_input()
+
+                    # nuevo usuario
+                    nuevoUsuario = requests.post('http://'+data+':7000/api/Users', json ={"username": usuario, "password": contrasenia, "email":email})
+
+                    if nuevoUsuario.status_code != 200:
+                        print "Error: "+nuevoUsuario.json()['error']['message']
+                        exit(0)
+
+                    print "Usuario creado"
+                    menu = 0
 
 # Primer argumento direccion IP
-#a = Cliente(str(sys.argv[1]))
-#a.start()
+a = Cliente(str(sys.argv[1]))
+a.start()
