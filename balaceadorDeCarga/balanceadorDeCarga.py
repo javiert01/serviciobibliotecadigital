@@ -8,6 +8,7 @@ import random
 # Almacena las direcciones IP
 # de los servidores disponibles
 listaDireccionesIPServidores = []
+listaDireccionesDNSServidores = []
 
 # Almacena los sockets para responder
 # a los clientes
@@ -16,6 +17,11 @@ listaSocketsClientes = []
 # Estadisticas
 solicitudesRecibido = 0
 solicitudesAtendido = 0
+
+# Procesamiento dns azure
+def procesamientoDNSAzure(dns):
+    dns = dns+'.centralus.cloudapp.azure.com'
+    return dns
 
 # Devuele la direccion IP de un servidor disponible
 def seleccionServidorDisponible():
@@ -26,7 +32,8 @@ def seleccionServidorDisponible():
     conn = listaSocketsClientes.pop()
 
     # envia la direccion ip de un servidor disponible
-    conn.send(str(listaDireccionesIPServidores[numeroSeleccionado]))
+    conn.send(str(listaDireccionesIPServidores[numeroSeleccionado])
+    +' '+str(listaDireccionesDNSServidores[numeroSeleccionado]))
 
     global solicitudesAtendido
     solicitudesAtendido = solicitudesAtendido + 1
@@ -90,7 +97,12 @@ class ServidorParaServidores (threading.Thread):
             conn, addr = s.accept()
             print "servidor archivos"
             print "ha establecido conexion: "+str(addr[0])+":"+str(addr[1])
+
+            dns = conn.recv(1024)
+            dns = procesamientoDNSAzure(dns)
+            listaDireccionesDNSServidores.append(dns)
             listaDireccionesIPServidores.append(str(addr[0]))
+
             conn.close()
             print "conexion terminada: "+str(addr[0])+":"+str(addr[1])
 
