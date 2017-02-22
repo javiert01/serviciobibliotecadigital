@@ -31,7 +31,7 @@ numeroSolictudesProcesado = 0
 
 # puerto 7000 para servidor de archivos
 def inicioServidorArchivos():
-    call(["node", "."])
+    call(["node", "app.js"])
 
 class ServidorArchivos (threading.Thread):
 
@@ -45,6 +45,7 @@ class ServidorArchivos (threading.Thread):
         # conexion al servidor central
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect((str(self.ip), 9000))
+	s.sendall(socket.getfqdn())
         s.close()
 
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
