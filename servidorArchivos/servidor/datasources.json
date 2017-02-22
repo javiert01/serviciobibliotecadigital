@@ -11,6 +11,20 @@
   "storage": {
     "name": "storage",
     "connector": "loopback-component-storage",
-    "root": "./servidor/archivos"
+    "provider": "azure",
+    "storageAccount": "",
+    "storageAccessKey": ""
+
+  },
+  "cuentas": {
+    "connector": "mssql",
+    "host": "persistencia.database.windows.net",
+    "port": 1433,
+    "database": "biblioteca",
+    "password": "",
+    "user": "",
+    "options": {
+      "encrypt": true
+    }
   }
 }
