@@ -30,9 +30,14 @@ class Cliente (threading.Thread):
             s.close()
             exit(0)
         else:
+
+            ip = data.split( )[0]
+            dns = data.split( )[1]
+	    print dns
+
             # Notifica al servidor solicitud procesado
             s2 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s2.connect((data, 7001))
+            s2.connect((dns, 7001))
             s2.close()
 
             menu = 0
@@ -50,7 +55,7 @@ class Cliente (threading.Thread):
                     print "ingresar contrasenia"
                     contrasenia = raw_input()
 
-                    resultado = requests.post('http://'+data+':7000/api/Users/login', json ={"username": usuario, "password": contrasenia})
+                    resultado = requests.post('http://'+dns+':7000/api/Users/login', json ={"username": usuario, "password": contrasenia})
 
                     # Atrapa error en caso que exista
                     if resultado.status_code != 200:
@@ -72,7 +77,7 @@ class Cliente (threading.Thread):
                         print ""
 
                         if menu == "1":
-                            libros = requests.get('http://'+data+':7000/api/archivos/libros/files', params={"access_token":token})
+                            libros = requests.get('http://'+dns+':7000/api/archivos/epnlibros/files', params={"access_token":token})
 
                             numeroLibro = 0
                             for libro in libros.json():
@@ -84,7 +89,7 @@ class Cliente (threading.Thread):
 
                         if menu == "2":
 
-                            libros = requests.get('http://'+data+':7000/api/archivos/libros/files', params={"access_token":token})
+                            libros = requests.get('http://'+dns+':7000/api/archivos/epnlibros/files', params={"access_token":token})
 
                             numeroLibro = 0
                             nombresLibros = []
@@ -98,7 +103,7 @@ class Cliente (threading.Thread):
                             print ""
 
                             # descargar libro seleccionado
-                            descarga = requests.get('http://'+data+':7000/api/archivos/libros/download/'+nombresLibros[int(menu)-1], params={"access_token":token}, stream=True)
+                            descarga = requests.get('http://'+dns+':7000/api/archivos/epnlibros/download/'+nombresLibros[int(menu)-1], params={"access_token":token}, stream=True)
 
                             if descarga.status_code != 200:
                                 print "Error: "+descarga.json()['error']['message']
@@ -121,7 +126,7 @@ class Cliente (threading.Thread):
                             nombreArchivo = path[len(path)-1]
 
                             # enviar archivo
-                            subirArchivo = requests.post('http://'+data+':7000/api/archivos/libros/upload', params={"access_token":token}, files={nombreArchivo: open(rutaArchivo, 'rb')})
+                            subirArchivo = requests.post('http://'+dns+':7000/api/archivos/epnlibros/upload', params={"access_token":token}, files={nombreArchivo: open(rutaArchivo, 'rb')})
 
                             if subirArchivo.status_code != 200:
                                 print "Error: "+subirArchivo.json()['error']['message']
@@ -143,7 +148,7 @@ class Cliente (threading.Thread):
                     email = raw_input()
 
                     # nuevo usuario
-                    nuevoUsuario = requests.post('http://'+data+':7000/api/Users', json ={"username": usuario, "password": contrasenia, "email":email})
+                    nuevoUsuario = requests.post('http://'+dns+':7000/api/Users', json ={"username": usuario, "password": contrasenia, "email":email})
 
                     if nuevoUsuario.status_code != 200:
                         print "Error: "+nuevoUsuario.json()['error']['message']
